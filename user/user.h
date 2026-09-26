@@ -1,6 +1,7 @@
 #define SBRK_ERROR ((char *)-1)
 
 struct stat;
+struct procinfo;
 
 // system calls
 int fork(void);
@@ -26,6 +27,8 @@ int pause(int);
 int uptime(void);
 int sync(void);
 int adder(int , int );
+int ps_listinfo (struct procinfo *plist, int lim);
+
 
 // ulib.c
 int stat(const char *, struct stat *);
