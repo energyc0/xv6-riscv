@@ -8,6 +8,13 @@
 
 extern struct spinlock wait_lock;
 extern struct proc proc[NPROC];
+
+static const enum pinfostate states_translate[] = {
+    [ZOMBIE] = PI_ZOMBIE,
+    [SLEEPING] = PI_SLEEPING,
+    [RUNNING] = PI_RUNNING,
+    [RUNNABLE] = PI_RUNNABLE
+};
 /* 
     Return amount of processes in the list.
     Return negative values when error occurred.
@@ -37,7 +44,7 @@ uint64 sys_ps_listinfo(void)
         }
         struct procinfo info;
         info.pid = p->pid;
-        info.state = p->state;
+        info.state = states_translate[p->state];
         safestrcpy(info.name, p->name, sizeof(p->name));
 
         struct proc *parent = p->parent;
@@ -48,7 +55,7 @@ uint64 sys_ps_listinfo(void)
         } else {
             info.ppid = 0;
         }
-        if (copyout(cur_proc->pagetable,cur_proc->sz, (uint64)(plist + count),(char*)&info,  sizeof(info))) 
+        if (copyout(cur_proc->pagetable, cur_proc->sz, (uint64)(plist + count), (char*)&info,  sizeof(info))) 
         {
             release(&p->lock);
             release(&wait_lock);
