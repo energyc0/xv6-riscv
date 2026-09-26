@@ -28,22 +28,28 @@ uint64 sys_ps_listinfo(void)
     acquire(&wait_lock);
     uint64 count = 0;
     for(int i = 0; i < NPROC && count < lim; i++) {
-        acquire(&proc[i].lock);
-        if(proc[i].state == UNUSED || proc[i].state == USED)
+        struct proc *p = &proc[i];
+        acquire(&p->lock);
+        if(p->state == UNUSED || p->state == USED) {
+            release(&p->lock);
             continue;
+        }
         struct procinfo info;
-        info.pid = proc[i].pid;
-        info.state = proc[i].state;
-        safestrcpy(info.name, proc[i].name, sizeof(proc[i].name));
+        info.pid = p->pid;
+        info.state = p->state;
+        safestrcpy(info.name, p->name, sizeof(p->name));
 
-        acquire(&proc[i].parent->lock);
-        printk("Good!\n");
-        info.ppid = proc[i].parent->pid;
-        release(&proc[i].parent->lock);
-        printk("Good!\n");
+        struct proc *parent = p->parent;
+        if (parent != 0) {
+            acquire(&parent->lock);
+            info.ppid = parent->pid;
+            release(&parent->lock);
+        } else {
+            info.ppid = 0;
+        }
         if (copyout(cur_proc->pagetable,cur_proc->sz, (uint64)(plist + count),(char*)&info,  sizeof(info)))
             return -3;
-        release(&proc[i].lock);
+        release(&p->lock);
         count++;
     }
     release(&wait_lock);
