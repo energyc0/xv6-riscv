@@ -16,7 +16,7 @@ uint64 sys_ps_listinfo(void)
     struct procinfo *plist;
     int lim;
     argaddr(0, (uint64*)&plist);
-    argint(0, &lim);
+    argint(1, &lim);
 
     if (plist == 0 || lim < 0)
         return -1;
@@ -30,19 +30,21 @@ uint64 sys_ps_listinfo(void)
     for(int i = 0; i < NPROC && count < lim; i++) {
         acquire(&proc[i].lock);
         if(proc[i].state == UNUSED || proc[i].state == USED)
-            i++;
+            continue;
         struct procinfo info;
         info.pid = proc[i].pid;
         info.state = proc[i].state;
         safestrcpy(info.name, proc[i].name, sizeof(proc[i].name));
 
         acquire(&proc[i].parent->lock);
+        printk("Good!\n");
         info.ppid = proc[i].parent->pid;
         release(&proc[i].parent->lock);
-
+        printk("Good!\n");
         if (copyout(cur_proc->pagetable,cur_proc->sz, (uint64)(plist + count),(char*)&info,  sizeof(info)))
             return -3;
         release(&proc[i].lock);
+        count++;
     }
     release(&wait_lock);
 
