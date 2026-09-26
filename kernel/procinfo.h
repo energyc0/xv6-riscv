@@ -1,3 +1,4 @@
+#include "types.h"
 
 struct procinfo {
   int pid;

@@ -6,7 +6,6 @@
 #include "proc.h"
 #include "procinfo.h"
 
-
 extern struct spinlock wait_lock;
 extern struct proc proc[NPROC];
 /* 
@@ -26,14 +25,22 @@ uint64 sys_ps_listinfo(void)
     if(cur_proc == 0)
         return -2;
 
-
     acquire(&wait_lock);
     uint64 count = 0;
     for(int i = 0; i < NPROC && count < lim; i++) {
         acquire(&proc[i].lock);
         if(proc[i].state == UNUSED || proc[i].state == USED)
             i++;
-        if (copyout(cur_proc->pagetable,cur_proc->sz, (uint64)(plist + count),(char*)&proc[i],  sizeof(proc)))
+        struct procinfo info;
+        info.pid = proc[i].pid;
+        info.state = proc[i].state;
+        safestrcpy(info.name, proc[i].name, sizeof(proc[i].name));
+
+        acquire(&proc[i].parent->lock);
+        info.ppid = proc[i].parent->pid;
+        release(&proc[i].parent->lock);
+
+        if (copyout(cur_proc->pagetable,cur_proc->sz, (uint64)(plist + count),(char*)&info,  sizeof(info)))
             return -3;
         release(&proc[i].lock);
     }
