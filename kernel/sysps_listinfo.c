@@ -54,5 +54,5 @@ uint64 sys_ps_listinfo(void)
     }
     release(&wait_lock);
 
-    return 0;
+    return count;
 }
