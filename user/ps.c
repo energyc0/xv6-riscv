@@ -27,7 +27,7 @@ int main(int argc, char** argv)
         }
     }
 
-    printf("%d\n", k);
+    printf("Processes count: %d\n", k);
     for (int i = 0; i < k; i++) {
         printf("PID: %d, NAME: %s, STATE: %s, PPID: %d\n",
         plist[i].pid, plist[i].name, pstate_names[plist[i].state], plist[i].ppid);
