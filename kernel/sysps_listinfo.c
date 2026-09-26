@@ -9,7 +9,8 @@
 extern struct spinlock wait_lock;
 extern struct proc proc[NPROC];
 /* 
-    Return amount of processes in the list
+    Return amount of processes in the list.
+    Return negative values when error occurred.
 */
 uint64 sys_ps_listinfo(void)
 {
@@ -47,8 +48,12 @@ uint64 sys_ps_listinfo(void)
         } else {
             info.ppid = 0;
         }
-        if (copyout(cur_proc->pagetable,cur_proc->sz, (uint64)(plist + count),(char*)&info,  sizeof(info)))
+        if (copyout(cur_proc->pagetable,cur_proc->sz, (uint64)(plist + count),(char*)&info,  sizeof(info))) 
+        {
+            release(&p->lock);
+            release(&wait_lock);
             return -3;
+        }
         release(&p->lock);
         count++;
     }
