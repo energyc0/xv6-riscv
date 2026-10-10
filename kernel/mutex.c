@@ -51,6 +51,7 @@ mutexalloc()
 void
 mutexclose(mutex mtx)
 {
+  releasesleep(mtx->lock);
   kfree(mtx->lock);
 
   printk("PID %d: Released mutex lock - %p\n", myproc()->pid, mtx);
