@@ -74,9 +74,3 @@ sys_mutex_unlock(void)
     releasesleep(f->mtx);
     return 0;
 }
-
-uint64
-sys_mutex_close(void)
-{
-
-}
