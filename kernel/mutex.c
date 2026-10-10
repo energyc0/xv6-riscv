@@ -36,7 +36,6 @@ mutexalloc()
   mtx->ref = 1;
   mtx->readable = 0;
   mtx->writable = 0;
-  mtx->type = FD_MUTEX;
   mtx->lock = sleeplockalloc();
   if (mtx->lock == 0) {
     printk("PID %d: Failed to allocate mutex\n", myproc()->pid);
@@ -48,6 +47,7 @@ mutexalloc()
 
   return mtx;
 }
+
 void
 mutexclose(mutex mtx)
 {

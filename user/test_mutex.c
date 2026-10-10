@@ -60,15 +60,15 @@ test_without_mutex(int argc, char *argv[])
 void
 test_with_mutex(int fd, int argc, char *argv[])
 {
+  mutex_lock(fd);
   int pid = getpid();
   for (int i = 1; i < argc; i++) {
     char *arg = argv[i];
     for (int j = 0; arg[j] != '\0'; j++) {
-      mutex_lock(fd);
       print_row(pid, i, arg[j]);
-      mutex_unlock(fd);
     }
   }
+  mutex_unlock(fd);
 }
 
 int
