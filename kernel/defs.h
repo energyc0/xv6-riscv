@@ -148,7 +148,6 @@ void            syscall();
 uint64          sys_mutex(void);
 uint64          sys_mutex_lock(void);
 uint64          sys_mutex_unlock(void);
-uint64          sys_mutex_close(void);
 
 // trap.c
 extern uint     ticks;
