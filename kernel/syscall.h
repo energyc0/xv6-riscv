@@ -24,3 +24,5 @@
 #define SYS_mutex        23
 #define SYS_mutex_lock   24
 #define SYS_mutex_unlock 25
+#define SYS_adder        26
+#define SYS_ps_listinfo  27
