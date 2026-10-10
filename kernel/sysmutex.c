@@ -47,7 +47,7 @@ sys_mutex_lock(void)
   struct file *f = argmutex(0);
 
   if (!f) {
-    return 0;
+    return -1;
   }
 
   if (holdingsleep(f->lock)) {
@@ -65,7 +65,7 @@ sys_mutex_unlock(void)
   struct file *f = argmutex(0);
 
   if (!f) {
-    return 0;
+    return -1;
   }
 
   if (!holdingsleep(f->lock)) {
