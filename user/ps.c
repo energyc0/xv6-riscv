@@ -18,6 +18,8 @@ main(int argc, char **argv)
     start_size += PROC_LIST_SIZE;
     struct procinfo plist[start_size];
     k = ps_listinfo(plist, start_size);
+    if (k == start_size)
+      continue;
     if (k < 0) {
       fprintf(2, "Failed to read process list!\n");
       return 1;

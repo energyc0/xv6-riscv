@@ -1,0 +1,2 @@
+void mutexalloc();
+void mutexclose();

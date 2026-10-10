@@ -73,12 +73,20 @@ fileclose(struct file *f)
   f->type = FD_NONE;
   release(&ftable.lock);
 
-  if (ff.type == FD_PIPE) {
+  switch (ff.type) {
+  case FD_PIPE:
     pipeclose(ff.pipe, ff.writable);
-  } else if (ff.type == FD_INODE || ff.type == FD_DEVICE) {
+    break;
+  case FD_INODE:
+  case FD_DEVICE:
     begin_op();
     iput(ff.ip);
     end_op();
+    break;
+  case FD_MUTEX:
+
+  default:
+    panic("Undefined file descriptor type");
   }
 }
 
