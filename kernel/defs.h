@@ -131,6 +131,10 @@ int             strlen(const char*);
 int             strncmp(const char*, const char*, uint);
 char*           strncpy(char*, const char*, int);
 
+// sysfile.c
+int             argfd(int, int *, struct file **)
+int             fdalloc(struct file *)
+
 // syscall.c
 void            argint(int, int*);
 int             argstr(int, char*, int);
@@ -138,6 +142,13 @@ void            argaddr(int, uint64 *);
 int             fetchstr(uint64, char*, int);
 int             fetchaddr(uint64, uint64*);
 void            syscall();
+
+// sysmutex.c
+
+uint64          sys_mutex(void)
+uint64          sys_mutex_lock(void)
+uint64          sys_mutex_unlock(void)
+uint64          sys_mutex_close(void)
 
 // trap.c
 extern uint     ticks;

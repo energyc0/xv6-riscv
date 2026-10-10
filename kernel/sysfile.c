@@ -18,7 +18,7 @@
 
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
-static int
+int
 argfd(int n, int *pfd, struct file **pf)
 {
   int fd;
@@ -36,7 +36,7 @@ argfd(int n, int *pfd, struct file **pf)
 
 // Allocate a file descriptor for the given file.
 // Takes over file reference from caller on success.
-static int
+int
 fdalloc(struct file *f)
 {
   int fd;
@@ -527,6 +527,7 @@ sys_pipe(void)
     return -1;
   }
   return 0;
+<<<<<<< Updated upstream
 }
 
 uint64
@@ -541,3 +542,6 @@ uint64
 sys_mutex_unlock(void)
 {
 }
+=======
+}
+>>>>>>> Stashed changes
