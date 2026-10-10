@@ -20,7 +20,7 @@ mutexalloc()
   mtx->lock = (struct sleeplock *)kalloc();
   initsleeplock(mtx->lock, "Mutex");
 
-  printk("PID %d: Allocated mutex\n", myproc()->pid);
+  printk("PID %d: Allocated mutex - %p\n", myproc()->pid, mtx);
 
   return mtx;
 }
@@ -29,5 +29,5 @@ mutexclose(mutex mtx)
 {
   kfree(mtx->lock);
 
-  printk("PID %d: Released mutex lock\n", myproc()->pid);
+  printk("PID %d: Released mutex lock - %p\n", myproc()->pid, mtx);
 }

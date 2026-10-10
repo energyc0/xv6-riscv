@@ -55,7 +55,7 @@ sys_mutex_lock(void)
   }
 
   acquiresleep(f->lock);
-  printk("PID %d: Mutex acquired\n", myproc()->pid);
+  printk("PID %d: Mutex acquired - %p\n", myproc()->pid, f);
   return 0;
 }
 
@@ -73,6 +73,6 @@ sys_mutex_unlock(void)
   }
 
   releasesleep(f->lock);
-  printk("PID %d: Mutex released\n", myproc()->pid);
+  printk("PID %d: Mutex released - %p\n", myproc()->pid, f);
   return 0;
 }
