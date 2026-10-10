@@ -28,6 +28,9 @@ int uptime(void);
 int sync(void);
 int adder(int , int );
 int ps_listinfo (struct procinfo *plist, int lim);
+int mutex(void);
+int mutex_lock(void);
+int mutex_unlock(void);
 
 
 // ulib.c
