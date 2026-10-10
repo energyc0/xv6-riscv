@@ -84,7 +84,8 @@ fileclose(struct file *f)
     end_op();
     break;
   case FD_MUTEX:
-
+    mutexclose(f);
+    break;
   default:
     panic("Undefined file descriptor type");
   }

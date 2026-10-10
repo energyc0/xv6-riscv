@@ -529,6 +529,15 @@ sys_pipe(void)
   return 0;
 }
 
-uint64 sys_mutex(void);
-uint64 sys_mutex_lock(void);
-uint64 sys_mutex_unlock(void);
+uint64
+sys_mutex(void)
+{
+}
+uint64
+sys_mutex_lock(void)
+{
+}
+uint64
+sys_mutex_unlock(void)
+{
+}
