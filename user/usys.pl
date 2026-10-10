@@ -45,3 +45,6 @@ entry("uptime");
 entry("sync");
 entry("adder");
 entry("ps_listinfo");
+entry("mutex");
+entry("mutex_lock");
+entry("mutex_unlock");
