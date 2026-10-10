@@ -21,5 +21,12 @@
 #define SYS_mkdir  20
 #define SYS_close  21
 #define SYS_sync   22
+<<<<<<< Updated upstream
 #define SYS_adder  23
 #define SYS_ps_listinfo 24
+=======
+#define SYS_mutex  23
+#define SYS_mutex_lock 24
+#define SYS_mutex_unlock 25
+#define SYS_mutex_close 26
+>>>>>>> Stashed changes
