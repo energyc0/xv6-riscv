@@ -74,6 +74,7 @@ test_with_mutex(int fd, int argc, char *argv[])
 int
 main(int argc, char *argv[])
 {
+  int fd = mutex();
   int pid1 = fork();
   if (pid1 < 0) {
     printf("Error fork\n");
@@ -87,7 +88,6 @@ main(int argc, char *argv[])
 
     printf("\nmutex\n");
 
-    int fd = mutex();
     if (fd < 0) {
       printf("Error creating mutex\n");
       exit(1);
