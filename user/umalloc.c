@@ -186,7 +186,7 @@ free(void *p)
   struct sfl_header *header =
     (struct sfl_header *)((char *)p - sizeof(struct sfl_header));
   uint idx = find_block_type_idx(header->size);
-  printf("Freeing block of size %X\n", header->size);
+  printf("Freeing block of size 0x%x\n", header->size);
   header->next = blocks[idx];
   blocks[idx] = header;
 }
@@ -234,7 +234,7 @@ malloc(uint32 nbytes)
       }
     }
   }
-  printf("Allocated block at %p of size %X for %u\n", ret,
+  printf("Allocated block at %p of size 0x%x for %u\n", ret,
          ((struct sfl_header *)((char *)ret - sizeof(struct sfl_header)))->size,
          nbytes);
   return ret;

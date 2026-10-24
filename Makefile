@@ -157,6 +157,7 @@ UPROGS=\
 	$U/_addtest\
 	$U/_ps\
 	$U/_test_mutex\
+	$U/_test_alloc\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
