@@ -1,11 +1,17 @@
 #include "kernel/types.h"
+#include "kernel/riscv.h"
+#include "kernel/defs.h"
+#include "kernel/types.h"
 #include "kernel/stat.h"
-#include "user/user.h"
 #include "kernel/param.h"
+#include "kernel/spinlock.h"
+#include "kernel/proc.h"
+#include "user/user.h"
 
 // Memory allocator by Kernighan and Ritchie,
 // The C programming Language, 2nd ed.  Section 8.7.
 
+/*
 typedef long Align;
 
 union header {
@@ -87,4 +93,138 @@ malloc(uint nbytes)
       if ((p = morecore(nunits)) == 0)
         return 0;
   }
+}
+*/
+
+#define BLOCK_SIZE     (PGSIZE)
+#define MIN_ALLOC_SIZE (16)
+// 16, 32, 64, 128, 256, 512, 1024, 2048
+#define BLOCK_TYPES_AMOUNT (8)
+
+// Segregated Free List Header
+// First variable contains objects size in the block
+// The data block contains bitmap in the beginning
+// The other data is for allocated objects
+struct sfl_header {
+  uint32 size;
+  struct sfl_header *next;
+};
+
+// +1 for exceeding limit of max size
+static struct sfl_header *blocks[BLOCK_TYPES_AMOUNT + 1];
+
+static uint32
+round_to_power_of_two(uint32 nbytes)
+{
+  if (nbytes < MIN_ALLOC_SIZE)
+    return MIN_ALLOC_SIZE;
+  // if the power of 2
+  if ((nbytes & (nbytes - 1)) == nbytes)
+    return nbytes;
+  nbytes -= 1;
+  nbytes |= nbytes >> 1;
+  nbytes |= nbytes >> 2;
+  nbytes |= nbytes >> 4;
+  nbytes |= nbytes >> 8;
+  nbytes |= nbytes >> 16;
+  return nbytes + 1;
+}
+static uint32
+find_block_type_idx(uint32 block_size)
+{
+  uint32 size = MIN_ALLOC_SIZE;
+  for (uint i = 0; i < BLOCK_TYPES_AMOUNT; i++) {
+    if (block_size <= size)
+      return i;
+    size <<= 1;
+  }
+  return BLOCK_TYPES_AMOUNT - 1;
+}
+
+// allocate sfl block for objects of the given size
+// objs_size must be a power of two
+static struct sfl_header *
+alloc_block(uint32 objs_size)
+{
+  struct sfl_header *p = 0;
+  if (objs_size >= BLOCK_SIZE) {
+    const uint32 block_size =
+      round_to_power_of_two(objs_size + sizeof(struct sfl_header));
+    p = (void *)sbrk(block_size);
+    if ((char *)p != SBRK_ERROR) {
+      p->size = block_size - sizeof(struct sfl_header);
+      p->next = 0;
+    }
+  } else {
+    p = (void *)sbrk(BLOCK_SIZE);
+    if ((char *)p != SBRK_ERROR) {
+      const uint32 block_size = objs_size + sizeof(struct sfl_header);
+      const uint32 blocks_amount = BLOCK_SIZE / block_size;
+      struct sfl_header *cur_p = p;
+      for (uint32 i = 0; i < blocks_amount; i++) {
+        cur_p->size = objs_size;
+        if (i == blocks_amount - 1) {
+          cur_p->next = 0;
+        } else {
+          struct sfl_header *next =
+            (struct sfl_header *)((char *)cur_p + block_size);
+          cur_p->next = next;
+          cur_p = next;
+        }
+      }
+    }
+  }
+  return p;
+}
+
+void
+free(void *p)
+{
+  if (p == 0)
+    return;
+  struct sfl_header *header = p;
+  uint idx = find_block_type_idx(header->size);
+  header->next = blocks[idx];
+  blocks[idx] = header;
+}
+
+void *
+malloc(uint32 nbytes)
+{
+  if (nbytes == 0)
+    return 0;
+
+  void *ret = 0;
+  uint32 type_idx = find_block_type_idx(nbytes);
+  if (type_idx < BLOCK_TYPES_AMOUNT) {
+    if (blocks[type_idx] != 0) {
+      struct sfl_header *base = blocks[type_idx];
+      blocks[type_idx] = base->next;
+      ret = (void *)((char *)base + sizeof(struct sfl_header));
+    } else {
+      uint32 obj_size = round_to_power_of_two(nbytes);
+      struct sfl_header *base = (void *)alloc_block(obj_size);
+      blocks[type_idx] = base->next;
+      ret = (void *)((char *)base + sizeof(struct sfl_header));
+    }
+    // >2048 bytes
+  } else {
+    struct sfl_header *p = blocks[type_idx];
+    if (p != 0 && p->size >= nbytes) {
+      blocks[type_idx] = p->next;
+      return (void *)((char *)p + sizeof(struct sfl_header));
+    }
+    for (; p->next != 0; p = p->next) {
+      struct sfl_header *cur = p->next;
+      if (cur->size >= nbytes) {
+        p->next = cur->next;
+        return (void *)((char *)cur + sizeof(struct sfl_header));
+      }
+    }
+    uint32 obj_size = round_to_power_of_two(sizeof(struct sfl_header) + nbytes);
+    struct sfl_header *base = alloc_block(obj_size);
+    base->next = blocks[type_idx];
+    ret = (void *)((char *)base + sizeof(struct sfl_header));
+  }
+  return ret;
 }
