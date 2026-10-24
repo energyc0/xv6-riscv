@@ -28,10 +28,10 @@ sleeplockalloc()
   return &(lock_ptables[n_ptables - 1][n_mutexes++]);
 }
 
-mutex
+mutex_t
 mutexalloc()
 {
-  mutex mtx = filealloc();
+  mutex_t mtx = filealloc();
   mtx->type = FD_MUTEX;
   mtx->ref = 1;
   mtx->readable = 0;
@@ -49,7 +49,7 @@ mutexalloc()
 }
 
 void
-mutexclose(mutex mtx)
+mutexclose(mutex_t mtx)
 {
   releasesleep(mtx->lock);
   kfree(mtx->lock);

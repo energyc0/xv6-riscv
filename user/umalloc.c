@@ -1,6 +1,5 @@
 #include "kernel/types.h"
 #include "kernel/riscv.h"
-#include "kernel/defs.h"
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "kernel/param.h"
@@ -151,12 +150,14 @@ alloc_block(uint32 objs_size)
     const uint32 block_size =
       round_to_power_of_two(objs_size + sizeof(struct sfl_header));
     p = (void *)sbrk(block_size);
+    printf("Current heap top: %p\n", (char *)p + block_size);
     if ((char *)p != SBRK_ERROR) {
       p->size = block_size - sizeof(struct sfl_header);
       p->next = 0;
     }
   } else {
     p = (void *)sbrk(BLOCK_SIZE);
+    printf("Current heap top: %p\n", (char *)p + BLOCK_SIZE);
     if ((char *)p != SBRK_ERROR) {
       const uint32 block_size = objs_size + sizeof(struct sfl_header);
       const uint32 blocks_amount = BLOCK_SIZE / block_size;
@@ -182,8 +183,10 @@ free(void *p)
 {
   if (p == 0)
     return;
-  struct sfl_header *header = p;
+  struct sfl_header *header =
+    (struct sfl_header *)((char *)p - sizeof(struct sfl_header));
   uint idx = find_block_type_idx(header->size);
+  printf("Freeing block of size %X\n", header->size);
   header->next = blocks[idx];
   blocks[idx] = header;
 }
@@ -212,19 +215,27 @@ malloc(uint32 nbytes)
     struct sfl_header *p = blocks[type_idx];
     if (p != 0 && p->size >= nbytes) {
       blocks[type_idx] = p->next;
-      return (void *)((char *)p + sizeof(struct sfl_header));
-    }
-    for (; p->next != 0; p = p->next) {
-      struct sfl_header *cur = p->next;
-      if (cur->size >= nbytes) {
-        p->next = cur->next;
-        return (void *)((char *)cur + sizeof(struct sfl_header));
+      ret = (void *)((char *)p + sizeof(struct sfl_header));
+    } else {
+      for (; p->next != 0; p = p->next) {
+        struct sfl_header *cur = p->next;
+        if (cur->size >= nbytes) {
+          p->next = cur->next;
+          ret = (void *)((char *)cur + sizeof(struct sfl_header));
+          break;
+        };
+      }
+      if (ret == 0) {
+        uint32 obj_size =
+          round_to_power_of_two(sizeof(struct sfl_header) + nbytes);
+        struct sfl_header *base = alloc_block(obj_size);
+        base->next = blocks[type_idx];
+        ret = (void *)((char *)base + sizeof(struct sfl_header));
       }
     }
-    uint32 obj_size = round_to_power_of_two(sizeof(struct sfl_header) + nbytes);
-    struct sfl_header *base = alloc_block(obj_size);
-    base->next = blocks[type_idx];
-    ret = (void *)((char *)base + sizeof(struct sfl_header));
   }
+  printf("Allocated block at %p of size %X for %u\n", ret,
+         ((struct sfl_header *)((char *)ret - sizeof(struct sfl_header)))->size,
+         nbytes);
   return ret;
 }
