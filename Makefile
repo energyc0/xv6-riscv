@@ -158,6 +158,7 @@ UPROGS=\
 	$U/_ps\
 	$U/_test_mutex\
 	$U/_test_alloc\
+	$U/_print_pages\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

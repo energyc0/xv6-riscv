@@ -31,6 +31,7 @@ int ps_listinfo(struct procinfo *plist, int lim);
 int mutex(void);
 int mutex_lock(int);
 int mutex_unlock(int);
+int memory_pages(void);
 
 // ulib.c
 int stat(const char *, struct stat *);

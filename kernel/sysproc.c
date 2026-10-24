@@ -114,9 +114,21 @@ sys_uptime(void)
 uint64
 sys_adder(void)
 {
-  int a,b;
+  int a, b;
   argint(0, &a);
   argint(1, &b);
   printk("Adding %d + %d.\n", a, b);
   return a + b;
+}
+
+uint64
+sys_memory_pages(void)
+{
+  struct proc *p = myproc();
+
+  printk("PAGETABLE %p\n", p->pagetable);
+
+  vm_print_pages(p->pagetable, 2);
+
+  return 0;
 }

@@ -489,3 +489,34 @@ ismapped(pagetable_t pagetable, uint64 va)
   }
   return 0;
 }
+
+void
+vm_print_pages(pagetable_t pagetable, int level)
+{
+  for (int i = 0; i < 512; i++) {
+    pte_t pte = pagetable[i];
+
+    if (pte & PTE_V) {
+      uint64 pa = PTE2PA(pte);
+
+      int dots = (2 - level + 1) * 2;
+      for (int d = 0; d < dots; d++) {
+        printk(".");
+      }
+
+      printk(" 0x%x -> 0x%lx ", i, (unsigned long)pa);
+
+      printk("%c", (pte & PTE_R) ? 'R' : '_');
+      printk("%c", (pte & PTE_W) ? 'W' : '_');
+      printk("%c", (pte & PTE_X) ? 'X' : '_');
+      printk("%c", (pte & PTE_U) ? 'U' : '_');
+      printk("%c", (pte & PTE_G) ? 'G' : '_');
+      printk("%c", (pte & PTE_A) ? 'A' : '_');
+      printk("%c\n", (pte & PTE_D) ? 'D' : '_');
+
+      if (level > 0 && (pte & (PTE_R | PTE_W | PTE_X)) == 0) {
+        vm_print_pages((pagetable_t)pa, level - 1);
+      }
+    }
+  }
+}

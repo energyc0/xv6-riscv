@@ -26,3 +26,4 @@
 #define SYS_mutex_unlock 25
 #define SYS_adder        26
 #define SYS_ps_listinfo  27
+#define SYS_memory_pages 28
