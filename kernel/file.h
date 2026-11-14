@@ -38,4 +38,10 @@ struct devsw {
 
 extern struct devsw devsw[];
 
-#define CONSOLE 1
+#define MAJOR_PSEUDO_DEV 0
+#define MAJOR_CONSOLE    1
+#define MAJOR_RTC        2
+
+#define MINOR_PSEUDO_NULL     0
+#define MINOR_PSEUDO_ZERO     1
+#define MINOR_PSEUDO_NULLSTAT 2

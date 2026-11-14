@@ -17,8 +17,19 @@ main(void)
   int pid, wpid;
 
   if (open("console", O_RDWR) < 0) {
-    mknod("console", CONSOLE, 0);
+    mknod("console", MAJOR_CONSOLE, 0);
     open("console", O_RDWR);
+  }
+  if (stat("null", 0) == -1) {
+    mknod("null", MAJOR_PSEUDO_DEV, MINOR_PSEUDO_NULL);
+  }
+
+  if (stat("nullstat", 0) == -1) {
+    mknod("nullstat", MAJOR_PSEUDO_DEV, MINOR_PSEUDO_NULLSTAT);
+  }
+
+  if (stat("zero", 0) == -1) {
+    mknod("zero", MAJOR_PSEUDO_DEV, MINOR_PSEUDO_ZERO);
   }
   dup(0); // stdout
   dup(0); // stderr

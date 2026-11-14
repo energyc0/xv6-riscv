@@ -118,7 +118,7 @@ round_to_power_of_two(uint32 nbytes)
   if (nbytes < MIN_ALLOC_SIZE)
     return MIN_ALLOC_SIZE;
   // if the power of 2
-  if ((nbytes & (nbytes - 1)) == nbytes)
+  if ((nbytes & (nbytes - 1)) == 0)
     return nbytes;
   nbytes -= 1;
   nbytes |= nbytes >> 1;
@@ -128,6 +128,7 @@ round_to_power_of_two(uint32 nbytes)
   nbytes |= nbytes >> 16;
   return nbytes + 1;
 }
+
 static uint32
 find_block_type_idx(uint32 block_size)
 {
@@ -141,26 +142,25 @@ find_block_type_idx(uint32 block_size)
 }
 
 // allocate sfl block for objects of the given size
-// objs_size must be a power of two
 static struct sfl_header *
 alloc_block(uint32 objs_size)
 {
+  // objs_size must be a power of two
+  uint32 alloc_size =
+    round_to_power_of_two(objs_size + sizeof(struct sfl_header));
   struct sfl_header *p = 0;
-  if (objs_size >= BLOCK_SIZE) {
-    const uint32 block_size =
-      round_to_power_of_two(objs_size + sizeof(struct sfl_header));
-    p = (void *)sbrk(block_size);
-    printf("Current heap top: %p\n", (char *)p + block_size);
+  if (alloc_size > BLOCK_SIZE) {
+    p = (void *)sbrk(alloc_size);
+    printf("Current heap top: %p\n", (char *)p + alloc_size);
     if ((char *)p != SBRK_ERROR) {
-      p->size = block_size - sizeof(struct sfl_header);
+      p->size = alloc_size - sizeof(struct sfl_header);
       p->next = 0;
     }
   } else {
     p = (void *)sbrk(BLOCK_SIZE);
     printf("Current heap top: %p\n", (char *)p + BLOCK_SIZE);
     if ((char *)p != SBRK_ERROR) {
-      const uint32 block_size = objs_size + sizeof(struct sfl_header);
-      const uint32 blocks_amount = BLOCK_SIZE / block_size;
+      const uint32 blocks_amount = BLOCK_SIZE / objs_size;
       struct sfl_header *cur_p = p;
       for (uint32 i = 0; i < blocks_amount; i++) {
         cur_p->size = objs_size;
@@ -168,7 +168,7 @@ alloc_block(uint32 objs_size)
           cur_p->next = 0;
         } else {
           struct sfl_header *next =
-            (struct sfl_header *)((char *)cur_p + block_size);
+            (struct sfl_header *)((char *)cur_p + objs_size);
           cur_p->next = next;
           cur_p = next;
         }
@@ -205,8 +205,7 @@ malloc(uint32 nbytes)
       blocks[type_idx] = base->next;
       ret = (void *)((char *)base + sizeof(struct sfl_header));
     } else {
-      uint32 obj_size = round_to_power_of_two(nbytes);
-      struct sfl_header *base = (void *)alloc_block(obj_size);
+      struct sfl_header *base = (void *)alloc_block(nbytes);
       blocks[type_idx] = base->next;
       ret = (void *)((char *)base + sizeof(struct sfl_header));
     }
@@ -217,18 +216,18 @@ malloc(uint32 nbytes)
       blocks[type_idx] = p->next;
       ret = (void *)((char *)p + sizeof(struct sfl_header));
     } else {
-      for (; p->next != 0; p = p->next) {
-        struct sfl_header *cur = p->next;
-        if (cur->size >= nbytes) {
-          p->next = cur->next;
-          ret = (void *)((char *)cur + sizeof(struct sfl_header));
-          break;
-        };
+      if (p != 0) {
+        for (; p->next != 0; p = p->next) {
+          struct sfl_header *cur = p->next;
+          if (cur->size >= nbytes) {
+            p->next = cur->next;
+            ret = (void *)((char *)cur + sizeof(struct sfl_header));
+            break;
+          };
+        }
       }
       if (ret == 0) {
-        uint32 obj_size =
-          round_to_power_of_two(sizeof(struct sfl_header) + nbytes);
-        struct sfl_header *base = alloc_block(obj_size);
+        struct sfl_header *base = alloc_block(nbytes);
         base->next = blocks[type_idx];
         ret = (void *)((char *)base + sizeof(struct sfl_header));
       }
