@@ -83,6 +83,7 @@ pseudo_dev_write(int minor, int user_src, uint64 src, int n)
   default:
     return -1;
   }
+  return -1;
 }
 
 void

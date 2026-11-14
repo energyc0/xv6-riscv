@@ -1,4 +1,5 @@
 #define SBRK_ERROR ((char *)-1)
+#define EOF        0
 
 struct stat;
 struct procinfo;
