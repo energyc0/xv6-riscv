@@ -198,5 +198,9 @@ void            virtio_disk_intr(void);
 mutex_t           mutexalloc(void);
 void            mutexclose(mutex_t);
 
+// pseudo_dev.c
+void            pseudo_dev_init(void);
+
+#define EOF 0
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x) / sizeof((x)[0]))

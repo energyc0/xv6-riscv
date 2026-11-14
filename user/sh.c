@@ -1,5 +1,5 @@
 // Shell.
-
+#include "kernel/defs.h"
 #include "kernel/types.h"
 #include "user/user.h"
 #include "kernel/fcntl.h"
@@ -137,7 +137,7 @@ getcmd(char *buf, int nbuf)
   write(2, "$ ", 2);
   memset(buf, 0, nbuf);
   gets(buf, nbuf);
-  if (buf[0] == 0) // EOF
+  if (buf[0] == EOF) // EOF
     return -1;
   return 0;
 }

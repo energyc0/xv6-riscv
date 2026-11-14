@@ -23,13 +23,10 @@ test_kalloc()
   memory_pages();
   printf("\n");
 
-  printf("11");
-
   if (sbrk(-size) == (char *)-1) {
     printf("Sweep error\n");
     exit(1);
   }
-  printf("22");
   memory_pages();
   printf("\n");
 }
@@ -38,6 +35,5 @@ int
 main(int argc, char *argv[])
 {
   test_kalloc();
-  printf("kfoe");
   return 0;
 }
