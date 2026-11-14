@@ -1,7 +1,13 @@
 #include "types.h"
+#include "param.h"
+#include "riscv.h"
 #include "defs.h"
+#include "spinlock.h"
+#include "sleeplock.h"
+#include "fs.h"
 #include "file.h"
 
+#define EOF 0
 static uint64 nullstat_bytes_written = 0;
 
 int
@@ -43,6 +49,7 @@ pseudo_dev_write(int minor, int user_dst, uint64 dst, int n)
   default:
     return -1;
   }
+  return -1;
 }
 
 void
