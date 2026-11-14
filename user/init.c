@@ -31,6 +31,11 @@ main(void)
   if (stat("zero", 0) == -1) {
     mknod("zero", MAJOR_PSEUDO_DEV, MINOR_PSEUDO_ZERO);
   }
+
+  if (stat("rtc", 0) == -1) {
+    mknod("rtc", MAJOR_RTC, 0);
+  }
+
   dup(0); // stdout
   dup(0); // stderr
 

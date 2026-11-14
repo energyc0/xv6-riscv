@@ -201,6 +201,9 @@ void            mutexclose(mutex_t);
 // pseudo_dev.c
 void            pseudo_dev_init(void);
 
+//rtc.c
+void            rtcinit(void);
+
 #define EOF 0
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x) / sizeof((x)[0]))

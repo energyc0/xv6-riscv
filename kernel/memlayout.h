@@ -21,6 +21,10 @@
 #define UART0     0x10000000L
 #define UART0_IRQ 10
 
+#define RTC_BASE      0x101000L
+#define RTC_TIME_LOW  (RTC_BASE + 0x00)
+#define RTC_TIME_HIGH (RTC_BASE + 0x04)
+
 // virtio mmio interface
 #define VIRTIO0     0x10001000
 #define VIRTIO0_IRQ 1

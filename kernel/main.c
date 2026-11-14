@@ -13,6 +13,7 @@ main()
   if (cpuid() == 0) {
     consoleinit();
     pseudo_dev_init();
+    rtcinit();
     printkinit();
     printk("\n");
     printk("xv6 kernel is booting\n");
