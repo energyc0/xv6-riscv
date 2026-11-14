@@ -26,17 +26,19 @@ pseudo_dev_read(int minor, int user_dst, uint64 dst, int n)
     if (n != (int)sizeof(uint64))
       return -1;
 
-    uint64 value;
+    uint64 value; // пока пишем в буфер, держим на локе
     acquire(&pseudo.lock);
     value = pseudo.nullstat_bytes_written;
     release(&pseudo.lock);
 
-    if (either_copyout(user_dst, dst, &value, sizeof(value)) < 0)
+    if (
+      either_copyout(user_dst, dst, &value, sizeof(value)) <
+      0) // возвращает общее кол-во прочитанных байт если равно кол-ву запрошенных
       return -1;
     return (int)sizeof(value);
   }
 
-  case MINOR_PSEUDO_ZERO: {
+  case MINOR_PSEUDO_ZERO: { // возвращаем нулевые байты
     char zeros[64];
     memset(zeros, 0, sizeof(zeros));
 
@@ -68,16 +70,16 @@ pseudo_dev_write(int minor, int user_src, uint64 src, int n)
     return -1;
 
   switch (minor) {
-  case MINOR_PSEUDO_NULL:
+  case MINOR_PSEUDO_NULL: //  игнорироваение
     return n;
 
-  case MINOR_PSEUDO_NULLSTAT:
+  case MINOR_PSEUDO_NULLSTAT: // отбрасывает байты, ссчитаем кол=-во
     acquire(&pseudo.lock);
     pseudo.nullstat_bytes_written += (uint64)n;
     release(&pseudo.lock);
     return n;
 
-  case MINOR_PSEUDO_ZERO:
+  case MINOR_PSEUDO_ZERO: // запись не допускается
     return -1;
 
   default:
@@ -89,6 +91,8 @@ pseudo_dev_write(int minor, int user_src, uint64 src, int n)
 void
 pseudo_dev_init(void)
 {
+
+  // connect read and write system calls
   initlock(&pseudo.lock, "pseudo");
   devsw[MAJOR_PSEUDO_DEV].read = pseudo_dev_read;
   devsw[MAJOR_PSEUDO_DEV].write = pseudo_dev_write;
