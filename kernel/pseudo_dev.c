@@ -7,9 +7,9 @@
 #include "riscv.h"
 #include "defs.h"
 
-static struct { // глобальное состояние драйвера
+static struct { // global state of driver
   struct spinlock lock;
-  uint64 nullstat_bytes_written; // общее кол-во байт, записанных в Nullstat
+  uint64 nullstat_bytes_written; // total amount written to nullstat
 } pseudo;
 
 static int
